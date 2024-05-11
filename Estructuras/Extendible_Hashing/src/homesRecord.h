@@ -1,7 +1,3 @@
-//
-// Created by flowers on 11/05/24.
-//
-
 #ifndef BD2_PROYECTO1_HOMESRECORD_H
 #define BD2_PROYECTO1_HOMESRECORD_H
 
