@@ -33,8 +33,8 @@ struct SeqFile{
     string filename;
     string auxname;
     SeqFile(string filename){
-        this->filename = filename + ".dat";
-        this->auxname = filename + "aux.dat";
+        this->filename = filename;
+        this->auxname = "aux" + filename;
         fstream file(filename, ios::in | ios::binary);
         file.close();
         if(!file.good()){
@@ -48,10 +48,8 @@ struct SeqFile{
             int l = 0;
             file.seekg(0,ios::end);
             int u = (file.tellg()/sizeof(Record)) - 1;
-            cout << u << endl;
             while(u >= l){
                 int m = (l + u)/2;
-                cout << m << endl;
                 Record r;
                 file.seekg(m*sizeof(Record), ios::beg);
                 file.read((char*) &r, sizeof(Record));
@@ -76,29 +74,29 @@ struct SeqFile{
     void insert(Record reg){
         fstream file(filename, ios::in | ios::binary);
         Record r;
+        long opos = 0;
         while(file.read((char*) &r, sizeof(Record))){
             if(r.id > reg.id) break; // manejo de archivo auxiliar
+            opos = file.tellg();
         }
+        opos = opos - sizeof(Record);
+        file.seekg(opos, ios::beg);
+        file.read((char*) &r, sizeof(Record));
+        r.nextpos = (opos + sizeof(Record))/sizeof(Record);
         file.close();
         file.open(filename, ios::out | ios::binary);
-        file.seekp(0, ios::end);
-        long npos = file.tellp()/sizeof(Record);
-        cout << npos << endl; // error: no se actualiza
-        if(npos > 0){
-            file.seekp((npos-1)*sizeof(Record), ios::beg);
-            r.nextpos = npos;
-            file.write((char*) &r, sizeof(Record));
-            file.close();
-        }
+        file.seekp(opos, ios::beg);
+        file.write((char*) &r, sizeof(Record));
         file.close();
         file.open(filename, ios::app | ios::binary);
-        file.seekp(0, ios::end);
+        file.seekg(0, ios::end);
+        cout << file.tellp() << endl;
         file.write((char*) &reg, sizeof(Record));
     }
 };
 
 int main(){
-    SeqFile seq("datos");
+    SeqFile seq("datos.dat");
     Record r1;
     Record r2;
     Record r3;
@@ -113,4 +111,5 @@ int main(){
     seq.insert(r4);
     Record r = seq.find(3);
     r.showData();
+}owData();
 }
