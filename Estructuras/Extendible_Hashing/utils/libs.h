@@ -13,10 +13,10 @@
 
 using namespace std;
 
-typedef long long pos_t;
+typedef long long position_t;
 typedef int depth_t;
-typedef int sufix_t;
-typedef long long bsize_t;
+typedef int suffix_t;
+typedef long long bucketSize_t;
 typedef string filename_t;
 
 typedef int T;

@@ -31,20 +31,20 @@ struct Record{
              << longitud;
     }
 
-    void load_from_file(fstream &file) {
+    void load(fstream &file) {
         file.read( (char*) &codigo, sizeof(codigo) );
         file.read( (char*) nombre, sizeof(nombre) );
         file.read( (char*) &longitud, sizeof(longitud) );
     }
 
-    void save_to_file(fstream &file) {
+    void save(fstream &file) {
         file.write( (char*) &codigo, sizeof(codigo) );
         file.write( (char*) nombre, sizeof(nombre) );
         file.write( (char*) &longitud, sizeof(longitud) );
 
     }
 
-    void save_to_file(ofstream &file) {
+    void save(ofstream &file) {
         file.write( (char*) &codigo, sizeof(codigo) );
         file.write( (char*) nombre, sizeof(nombre) );
         file.write( (char*) &longitud, sizeof(longitud) );
