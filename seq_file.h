@@ -33,6 +33,7 @@ struct SeqFile{
     string filename;
     string auxname;
     int K = 10;  //Limite maximo de registros en el archivo auxiliar
+    const int MAX_PRIMARY_RECORDS = 100; //Límite de registros en el archivo principal
     SeqFile(string filename){
         this->filename = filename;
         this->auxname = "aux" + filename;
@@ -83,24 +84,32 @@ struct SeqFile{
       return notFound;
     }
 
+void insert(Record reg) {
+    fstream file(filename, ios::in | ios::out | ios::binary);
+    fstream auxfile(auxname, ios::in | ios::out | ios::binary | ios::app);
+    Record r;
+    long opos = 0;
+    long prev_pos = -1; // Posición del registro anterior
+    bool inserted = false;
 
-    void insert(Record reg){
-        fstream file(filename, ios::in | ios::binary);
-      fstream auxfile(auxname, ios::in | ios::out | ios::binary | ios::app);
-        Record r;
-        long opos = 0;
-        long prev_pos = -1; //Posición del registro anterior
-        bool inserted = false;
-      //Buscar posición correcta en archivo principal
-        while(file.read((char*) &r, sizeof(Record))){
-            if(r.id > reg.id) break; // manejo de archivo auxiliar
+    // Verificar la cantidad de registros en el archivo principal
+    file.seekg(0, ios::end);
+    int recordCount = file.tellg() / sizeof(Record);
+    file.clear(); // Limpiar los flags de estado
+    file.seekg(0, ios::beg); // Reiniciar la posición de lectura al inicio
+
+    if (recordCount < MAX_PRIMARY_RECORDS) {
+        // Buscar posición correcta en archivo principal
+        while (file.read((char*)&r, sizeof(Record))) {
+            if (r.id > reg.id) break; // Manejo de archivo auxiliar
             prev_pos = opos;
             opos = file.tellg();
         }
-      
-      if (file){
-        //Si hay un registro anterior, actualizar su nextpos
+
+        // Insertar el nuevo registro en la posición encontrada
+        file.clear(); // Limpiar los flags de estado
         if (prev_pos != -1) {
+            // Si hay un registro anterior, actualizar su nextpos
             file.seekg(prev_pos, ios::beg);
             file.read((char*)&r, sizeof(Record));
             r.nextpos = opos / sizeof(Record);
@@ -108,12 +117,12 @@ struct SeqFile{
             file.write((char*)&r, sizeof(Record));
         }
 
-        //Insertar el nuevo registro y actualizar su nextpos
+        // Insertar el nuevo registro y actualizar su nextpos
         file.seekp(opos, ios::beg);
-        reg.nextpos = opos / sizeof(Record) + 1;
+        reg.nextpos = (opos / sizeof(Record)) + 1;
         file.write((char*)&reg, sizeof(Record));
 
-        //Si hay un siguiente registro, actualizar su nextpos
+        // Si hay un siguiente registro, actualizar su nextpos
         file.seekg((opos + sizeof(Record)), ios::beg);
         if (file.read((char*)&r, sizeof(Record))) {
             reg.nextpos = opos / sizeof(Record) + 1;
@@ -121,18 +130,28 @@ struct SeqFile{
             file.write((char*)&reg, sizeof(Record));
         }
         inserted = true;
-      }
-        if (!inserted) {
-            auxfile.write((char*)&reg, sizeof(Record));
-        }
-        file.close();
-        auxfile.close();
-
-      //Chequear si el archivo auxiliar ha excedido el límite de K registros
-      if (countAuxRecords() > K) {
-          mergeFiles();
-      }
     }
+
+    if (!inserted) {
+        auxfile.write((char*)&reg, sizeof(Record));
+        if (recordCount == MAX_PRIMARY_RECORDS) {
+            file.seekg((recordCount - 1) * sizeof(Record), ios::beg);
+            file.read((char*)&r, sizeof(Record));
+            r.nextpos = MAX_PRIMARY_RECORDS; // Apuntar al primer registro del archivo auxiliar
+            file.seekp((recordCount - 1) * sizeof(Record), ios::beg);
+            file.write((char*)&r, sizeof(Record));
+        }
+    }
+
+    file.close();
+    auxfile.close();
+
+    // Chequear si el archivo auxiliar ha excedido el límite de K registros
+    if (countAuxRecords() > K) {
+        mergeFiles();
+    }
+}
+
 
 void remove(int key) {
     fstream file(filename, ios::in | ios::out | ios::binary);
