@@ -111,5 +111,4 @@ int main(){
     seq.insert(r4);
     Record r = seq.find(3);
     r.showData();
-}owData();
 }
