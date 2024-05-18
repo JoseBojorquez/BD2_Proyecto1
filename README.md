@@ -56,7 +56,31 @@ Las estrategias usadas son las siguientes:
 + Extendible Hashing
 
 ### Sequential File
+![seqFile](/Imagenes/seqFile.png) \
+**Insert:** Hace inserciones dependiendo de la posición donde debe ser ingresado el nuevo registro. Si el espacio está libre, inserta en el archivo principal. De otro modo, se inserta en el espacio auxiliar, manteniendo actualizados los punteros de cada uno de los registros. \
+\
+**Find:** Deberá buscar primero en el archivo principal y en caso de no encontrarlo se moverá a buscarlo en el espacio auxiliar. \
+\
+**Remove:** Se usa los punteros para saltar el registro eliminado y en la reconstrucción del archivo se eliminan completamente. \
+\
+**RangeSearch:** Se busca la primera key inicial y a partir de ahí se itera hasta llegar al último registro que sea menor o igual a la key final. \
+\
+**Rebuild:** Reconstruye el archivo una vez se haya alcanzado el tope de inserciones en el archivo auxiliar. \
 
 ### ISAM
-
+![Isam](/Imagenes/isam.png) \
+**Insert:** Escribe el registro en el archivo de datos y actualiza los índices primarios y terciarios. Lo cual implica leer los índices existentes y reorganizarlos si es necesario\
+\
+**Find:** Deberá buscar buscar en el índice terciario y obtener el bloque del índice secundario. Luego, buscar en el índice secundario para obtener el bloque del índice primario y finalmente buscar en el índice primario para obtener la posición del registro en el archivo de datos \
+\
+**Remove:** Busca y retira de la hoja en el archivo de datos. Si la página está vacía, hace de-allocate. \
+\
+**RangeSearch:** Comienza en la raíz y utiliza la key de comparaciones para ir hasta la hoja. Una vez ahí, recoge todos los archivos mayores o iguales a la key begin y cuando acaba regresa para buscar más registros en la hoja siguiente \
+\
 ### Extendible Hashing
+![extendibleHashing](/Imagenes/extendibleHashing.png) \
+**Insert:** Sea D la profundidad global del índice, aplica la función hash sobre la clave de búsqueda y obtener la secuencia de bits con longitud D. Después hace coincidir esa secuencia con una entrada en el directorio y se dirige al bucket correspondiente para encontrar el registro. \
+\
+**Find:** Se usa de manera parecida la secuencia D-bit para dirigirse al bucket en cuestión. Si no encuentra el bucket, procede a crear uno nuevo. Si encontró un bucket y no esta lleno, proceder a insertar. Si el bucket está lleno, divide el bucket y reinserta todos los registros actualizando el directorio. \
+\
+**Remove:** Localiza el buffer respectivo y remueve el registro. Si el bucket queda vacío, puede ser descartado dentro de los buckets manejados. Si dos buckets tienen pocos elementos y tienen el mismo prefijo en la profundidad local anterior (D-1), se procede a mezclar ambos buckets. \
