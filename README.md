@@ -107,3 +107,35 @@ La función `search` recupera los registros que coinciden con una clave dada. El
 3. **Recorrido del Bucket**: Se carga el bucket correspondiente y se busca el registro.
 4. **Páginas de Desbordamiento**: Se recorren las páginas de desbordamiento para encontrar todos los registros coincidentes.
 5. **Devolver Resultados**: Se devuelve un vector de todos los registros que coinciden con la clave.
+
+### Uso
+### 1. Clonar el repositorio
+```sh
+git clone https://github.com/JoseBojorquez/BD2_Proyecto1.git
+cd Estructuras/Extendible_Hashing/
+``` 
+### 2 Eliminar archivos previos para mejor experimentación
+```sh
+rm extHash ehash-TestRecord.data ehash-TestRecord.index
+rm extHash ehash-HomesRecord.data ehash-HomesRecord.index
+rm ./results/Test/ehash.csv
+rm ./results/Homes/ehash.csv
+```
+### 3. Experimentación: Para trabajar registro por registro, usar clase TestRecord
+```sh
+g++ main.cpp -o ./extHash
+```
+### 3.1 Fallar intencionalmente para ver las instrucciones
+```sh
+./extHash
+./extHash TestRecord add 1,carlos,933213333
+```
+#### 3.2 Los resultados se guardan en */results/Test* como un archivo CSV.
+#### 3.3 Probar todas las funcionalidades
+### 4.Insertar conjunto de registros usando HomesRecord
+#### 4.1 Dar permisos a los scripts bash
+```sh
+chmod +x HomeRecord_100.sh
+./HomeRecord_100.sh
+```
+#### 4.2 Todo se guarda en */results/Homes*
