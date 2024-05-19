@@ -31,6 +31,7 @@ void handle_add(ExtendibleHash<int, RecordType> &ehash, const std::string &input
     ehash.write(ehash.load());
 }
 
+
 template<typename RecordType>
 void handle_remove(ExtendibleHash<int, RecordType> &ehash, const std::string &input_parameter) {
     ehash.remove(stringToKey(input_parameter));
