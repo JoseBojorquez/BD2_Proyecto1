@@ -1,6 +1,7 @@
 #include "IndexRecord.h"
 
 //template <typename TKey,typename TRecord>
+template <typename KeyType,typename RecordType>
 class ExtendibleHash {
 private:
     bucketSize_t bucket_max_size;
@@ -20,7 +21,7 @@ private:
     // de esta manera determinamos si un registro pertenece a un bucket especifico.
     bool compare_hash_bit_to_bit(suffix_t key_hash, suffix_t sufix, depth_t depth);
 
-    suffix_t hash(T key);
+    suffix_t generate_hash(T key); // T
 
     IndexRecord* match_index_record(suffix_t key_hash);
 
@@ -28,25 +29,27 @@ public:
     ExtendibleHash(filename_t filename, bucketSize_t bucket_size, depth_t depth);
     ~ExtendibleHash();
     // Write new entry
-    bool insert(Record record);
+    bool insert(RecordType record);
 
-    bool remove(T key);
+    bool remove(T key); // T
 
-    vector<Record> search(T key);
+    vector<RecordType> search(T key); // T
 
-    vector<Record> rangeSearch(T begin_key, T end_key);
+    vector<RecordType> rangeSearch(T begin_key, T end_key); // T
 
-    vector<Record> load();
+    vector<RecordType> load();
 
-    void write(vector<Record> input_records); //write in csv
+    void write(vector<RecordType> input_records); //write in csv RECORD
 };
 
-void ExtendibleHash::add_entry_index(IndexRecord index_record)  {
+template <typename KeyType,typename RecordType>
+void ExtendibleHash<KeyType,RecordType>::add_entry_index(IndexRecord index_record)  {
     index_table.push_back(index_record);
 }
 
-void ExtendibleHash::init_index() {
-    Bucket empty_bucket{0,-1};
+template <typename KeyType,typename RecordType>
+void ExtendibleHash<KeyType,RecordType>::init_index() {
+    Bucket<RecordType> empty_bucket{0,-1};
     // Reservamos dos buckets vacios en data_file
     position_t position0, position1;
     ofstream data_file(data_filename, ios::binary | ios::trunc);
@@ -69,7 +72,8 @@ void ExtendibleHash::init_index() {
     add_entry_index(init1);
 }
 
-void ExtendibleHash::load_index() {
+template <typename KeyType,typename RecordType>
+void ExtendibleHash<KeyType,RecordType>::load_index() {
     ifstream input_index(index_filename, ios::binary);
     // global_depth = 0; // Start depth at 0
     bool file_exists = input_index.is_open();
@@ -88,7 +92,8 @@ void ExtendibleHash::load_index() {
     }
 }
 
-void ExtendibleHash::save_index() {
+template <typename KeyType,typename RecordType>
+void ExtendibleHash<KeyType,RecordType>::save_index() {
     ofstream output_index(index_filename, ios::binary | ios::trunc);
     if (output_index.is_open()) {
         for (auto &index_record : index_table) {
@@ -98,7 +103,8 @@ void ExtendibleHash::save_index() {
     output_index.close();
 }
 
-bool ExtendibleHash::compare_hash_bit_to_bit(suffix_t key_hash, suffix_t suffix, depth_t depth) {
+template <typename KeyType,typename RecordType>
+bool ExtendibleHash<KeyType,RecordType>::compare_hash_bit_to_bit(suffix_t key_hash, suffix_t suffix, depth_t depth) {
     for (int i = 0; i<depth; i++) {
         // Extrayendo el bit menos significativo para keyHash y suffix hasta cierta profundidad
         suffix_t key_hash_bit = (key_hash%2 + 2) %2;
@@ -123,12 +129,13 @@ bool ExtendibleHash::compare_hash_bit_to_bit(suffix_t key_hash, suffix_t suffix,
         */
 }
 
-
-suffix_t ExtendibleHash::hash(T key) {
-    return std::hash<T>()(key);
+template <typename KeyType,typename RecordType>
+suffix_t ExtendibleHash<KeyType,RecordType>::generate_hash(T key) { // T
+    return std::hash<KeyType>()(key); // T
 }
 
-IndexRecord* ExtendibleHash::match_index_record(suffix_t key_hash){
+template <typename KeyType,typename RecordType>
+IndexRecord* ExtendibleHash<KeyType,RecordType>::match_index_record(suffix_t key_hash){
     for (auto &index_record : index_table) {
         if (compare_hash_bit_to_bit(key_hash, index_record.sufix, index_record.depth)) {
             // Si hacen match
@@ -140,7 +147,8 @@ IndexRecord* ExtendibleHash::match_index_record(suffix_t key_hash){
     exit(2);
 }
 
-ExtendibleHash::ExtendibleHash(filename_t filename, bucketSize_t bucket_size, depth_t depth) {
+template <typename KeyType,typename RecordType>
+ExtendibleHash<KeyType,RecordType>::ExtendibleHash(filename_t filename, bucketSize_t bucket_size, depth_t depth) {
     data_filename = filename + ".data";
     index_filename = filename + ".index";
     bucket_max_size = bucket_size;
@@ -148,15 +156,17 @@ ExtendibleHash::ExtendibleHash(filename_t filename, bucketSize_t bucket_size, de
     load_index();
 }
 
-ExtendibleHash::~ExtendibleHash(){
+template <typename KeyType,typename RecordType>
+ExtendibleHash<KeyType,RecordType>::~ExtendibleHash(){
     save_index();
 }
 
-bool ExtendibleHash::insert(Record record) {
-    auto key_hash = hash(record.get_key());
+template <typename KeyType,typename RecordType>
+bool ExtendibleHash<KeyType,RecordType>::insert(RecordType record) { //?
+    auto key_hash = generate_hash(record.get_key());
     auto index_record = match_index_record(key_hash);
     auto bucket_position = index_record->bucket_position;
-    Bucket bucket;
+    Bucket<RecordType> bucket;
     fstream data_file(data_filename, ios::binary | ios::out | ios::in);
     if (data_file.is_open()){
         bucket.load(data_file, bucket_position, bucket_max_size);
@@ -168,25 +178,25 @@ bool ExtendibleHash::insert(Record record) {
                 // 0+suffix (old) && 1+suffix (new)
                 index_record->depth++;
                 // Copiar los nuevos vectores
-                vector<Record> zro_sufix;
-                vector<Record> one_sufix;
+                vector<RecordType> zero_suffix;
+                vector<RecordType> one_suffix;
                 for (auto &rec : bucket.records) {
-                    auto rec_hash = hash(rec.get_key());
+                    auto rec_hash = generate_hash(rec.get_key());
                     if ( compare_hash_bit_to_bit(rec_hash, index_record->sufix, index_record->depth ) ) {
-                        zro_sufix.push_back(rec);
+                        zero_suffix.push_back(rec);
                     }
                     else {
-                        one_sufix.push_back(rec);
+                        one_suffix.push_back(rec);
                     }
                 }
                 // Split index_record
                 // Sobreescribiendo sobre el antiguo bucket
-                bucket.records = zro_sufix;
-                bucket.bsize = zro_sufix.size();
+                bucket.records = zero_suffix;
+                bucket.bsize = zero_suffix.size();
                 // Creando y escribiendo un nuevo index_record(que es un bucket pair) para 1+sufix
-                Bucket one_bucket;
-                one_bucket.records = one_sufix;
-                one_bucket.bsize = one_sufix.size();
+                Bucket<RecordType> one_bucket;
+                one_bucket.records = one_suffix;
+                one_bucket.bsize = one_suffix.size();
                 one_bucket.next_bucket = -1; // creo que podemos juntarlo To_do en uno con una funcion copy
                 // WRITE to disk
                 data_file.seekp(0, ios::end); // Go to eof
@@ -194,7 +204,7 @@ bool ExtendibleHash::insert(Record record) {
                 one_bucket.save(data_file, pos_new, bucket_max_size);
                 bucket.save(data_file, bucket_position, bucket_max_size); // Sobreescribe un juego bucket en el archivo
                 // New index_record
-                suffix_t suffix_new = index_record->sufix + (1 << (index_record->depth-1));
+                suffix_t suffix_new = index_record->sufix + (1 << (index_record->depth-1)); // ?
                 IndexRecord index_record_new{index_record->depth, suffix_new, pos_new};
                 add_entry_index(index_record_new);
                 // añadimos recursivamente
@@ -220,7 +230,7 @@ bool ExtendibleHash::insert(Record record) {
                     bucket.next_bucket = bucket_position;
                     bucket.save(data_file, prev_bucket_position, bucket_max_size);
                     // Incializando el bucket vacio.
-                    Bucket empty_bucket{0,-1};
+                    Bucket<RecordType> empty_bucket{0,-1};
                     bucket = empty_bucket;
                 } // insertamos como normalmente se hace
                 bucket.records.push_back(record);
@@ -244,18 +254,19 @@ bool ExtendibleHash::insert(Record record) {
     return true;
 }
 
-bool ExtendibleHash::remove(T key) {
-    auto key_hash = hash(key);
+template <typename KeyType,typename RecordType>
+bool ExtendibleHash<KeyType,RecordType>::remove(T key) { // KeyType o lo dejamos en T (funciona si ambos son int)
+    auto key_hash = generate_hash(key);
     auto index_record = match_index_record(key_hash);
     auto bucket_position = index_record->bucket_position;
-    Bucket bucket;
+    Bucket<RecordType> bucket;
     // Buscar bucket hasta en las overflow pages, removeremos todas las apariciones
     fstream data_file(data_filename, ios::binary | ios::in | ios::out);
     if (data_file.is_open()){
         while (bucket_position != -1) {
             bucket.load(data_file, bucket_position, bucket_max_size); // Read bucket
             // Removemos repeticiones
-            vector<Record> res;
+            vector<RecordType> res;
             for (auto &record :  bucket.records) {
                 if (record.get_key() != key) {
                     res.push_back(record);
@@ -278,13 +289,14 @@ bool ExtendibleHash::remove(T key) {
     return true;
 }
 
-vector<Record> ExtendibleHash::search(T key) {
-    vector<Record> result_records;
-    auto key_hash = hash(key);
+template <typename KeyType,typename RecordType>
+vector<RecordType> ExtendibleHash<KeyType,RecordType>::search(T key) {
+    vector<RecordType> result_records;
+    auto key_hash = generate_hash(key);
     // Buscamos el bucket en index_record
     auto index_record = match_index_record(key_hash);
     auto bucket_position = index_record->bucket_position;
-    Bucket bucket;
+    Bucket<RecordType> bucket;
     // Buscamos buckets hasta en los overflow pages
     fstream data_file(data_filename, ios::binary | ios::in);
     if (data_file.is_open()){
@@ -303,19 +315,20 @@ vector<Record> ExtendibleHash::search(T key) {
     return result_records;
 }
 
-vector<Record> ExtendibleHash::rangeSearch(T begin_key, T end_key) {
-    vector<Record> result_records;
+template <typename KeyType,typename RecordType>
+vector<RecordType> ExtendibleHash<KeyType,RecordType>::rangeSearch(T begin_key,T end_key) {
+    vector<RecordType> result_records;
     fstream data_file(data_filename, ios::binary | ios::in);
     if (data_file.is_open()){
         // Iteramos en todos los buckets
         for (auto &index_record : index_table ){
             auto bucket_position = index_record.bucket_position;
-            Bucket bucket;
+            Bucket<RecordType> bucket;
             // buscamos en overflow pages
             while (bucket_position != -1) {
                 bucket.load(data_file, bucket_position, bucket_max_size); // Read bucket
                 // Search in bucket
-                for (auto &record :  bucket.records) {
+                for (auto &record :  bucket.records) { // puede ser que falle
                     if (record.get_key() >= begin_key && record.get_key() <= end_key) {
                         result_records.push_back(record);
                     }
@@ -328,14 +341,15 @@ vector<Record> ExtendibleHash::rangeSearch(T begin_key, T end_key) {
     return result_records;
 }
 
-vector<Record> ExtendibleHash::load() {
-    vector<Record> result_records;
+template <typename KeyType,typename RecordType>
+vector<RecordType> ExtendibleHash<KeyType,RecordType>::load() {
+    vector<RecordType> result_records;
     fstream data_file(data_filename, ios::binary | ios::in);
     if (data_file.is_open()){
         // Iteramos en todos los buckets
         for (auto &index_record : index_table ){
             auto bucket_position = index_record.bucket_position;
-            Bucket bucket;
+            Bucket<RecordType> bucket;
             // buscamos en overflow pages
             while (bucket_position != -1) {
                 bucket.load(data_file, bucket_position, bucket_max_size); // Read bucket
@@ -351,9 +365,20 @@ vector<Record> ExtendibleHash::load() {
     return result_records;
 }
 
-void ExtendibleHash::write(vector<Record> input_records) {
-    std::ofstream output_file_csv;
-    output_file_csv.open ("ehash.csv");
+template <typename KeyType,typename RecordType>
+void ExtendibleHash<KeyType,RecordType>::write(vector<RecordType> input_records) { // hacer un if para que ehash.csv
+    std::string directory;
+
+    if (typeid(RecordType) == typeid(TestRecord)) {
+        directory = "./results/Test/";
+    } else if (typeid(RecordType) == typeid(HomesRecord)) {
+        directory = "./results/Homes/";
+    } else {
+        std::cerr << "Unknown RecordType" << std::endl;
+        return;
+    }
+    std::string file_path = directory + "ehash.csv";
+    std::ofstream output_file_csv(file_path);
     for (auto val : input_records){
         output_file_csv<<val.print_csv();
     }

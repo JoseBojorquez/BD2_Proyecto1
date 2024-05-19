@@ -1,53 +1,53 @@
 #include "../utils/libs.h"
 
-struct Record{
+struct TestRecord{
 
     int codigo;
     char nombre[30];
-    long longitud;
+    long telefono;
 
 
     void set_data_from_string(string _params) {
         stringstream ss(_params);
         string _codigo;
         string _nombre;
-        string _longitud;
+        string _telefono;
         getline(ss, _codigo, ',');
         getline(ss, _nombre, ',');
-        getline(ss, _longitud, ',');
+        getline(ss, _telefono, ',');
 
-        set_data(stoi(_codigo),_nombre, atol(_longitud.c_str()));
+        set_data(stoi(_codigo),_nombre, atol(_telefono.c_str()));
     }
 
-    void set_data(int _codigo, string _nombre, long _longitud){
+    void set_data(int _codigo, string _nombre, long _telefono){
         codigo = _codigo;
         strcpy(nombre, _nombre.c_str());
-        longitud = _longitud;
+        telefono = _telefono;
     }
 
     void print_data(){
         cout << codigo<< " | "
              << string(nombre) << " | "
-             << longitud;
+             << telefono << std::endl;
     }
 
     void load(fstream &file) {
         file.read( (char*) &codigo, sizeof(codigo) );
         file.read( (char*) nombre, sizeof(nombre) );
-        file.read( (char*) &longitud, sizeof(longitud) );
+        file.read( (char*) &telefono, sizeof(telefono) );
     }
 
     void save(fstream &file) {
         file.write( (char*) &codigo, sizeof(codigo) );
         file.write( (char*) nombre, sizeof(nombre) );
-        file.write( (char*) &longitud, sizeof(longitud) );
+        file.write( (char*) &telefono, sizeof(telefono) );
 
     }
 
     void save(ofstream &file) {
         file.write( (char*) &codigo, sizeof(codigo) );
         file.write( (char*) nombre, sizeof(nombre) );
-        file.write( (char*) &longitud, sizeof(longitud) );
+        file.write( (char*) &telefono, sizeof(telefono) );
     }
 
     T get_key() {
@@ -59,6 +59,6 @@ struct Record{
         return
                 to_string(codigo)+","+
                 string(nombre)+","+
-                to_string(longitud)+"\n";
+                to_string(telefono)+"\n";
     }
 };
