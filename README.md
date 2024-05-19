@@ -78,8 +78,32 @@ Las estrategias usadas son las siguientes:
 \
 ### Extendible Hashing
 ![extendibleHashing](/Imagenes/extendibleHashing.png) \
-**Insert:** Sea D la profundidad global del índice, aplica la función hash sobre la clave de búsqueda y obtener la secuencia de bits con longitud D. Después hace coincidir esa secuencia con una entrada en el directorio y se dirige al bucket correspondiente para encontrar el registro. 
-\
-**Find:** Se usa de manera parecida la secuencia D-bit para dirigirse al bucket en cuestión. Si no encuentra el bucket, procede a crear uno nuevo. Si encontró un bucket y no esta lleno, proceder a insertar. Si el bucket está lleno, divide el bucket y reinserta todos los registros actualizando el directorio. \
-\
-**Remove:** Localiza el buffer respectivo y remueve el registro. Si el bucket queda vacío, puede ser descartado dentro de los buckets manejados. Si dos buckets tienen pocos elementos y tienen el mismo prefijo en la profundidad local anterior (D-1), se procede a mezclar ambos buckets. \
+#### Insert
+La función `insert` maneja la adición de un nuevo registro a la tabla hash. Aquí está un resumen de su proceso:
+
+1. **Generación del Hash**: La función comienza generando un valor hash para la clave del registro.
+2. **Coincidencia de Índice**: Luego encuentra el registro de índice adecuado que coincide con este valor hash.
+3. **Carga del Bucket**: El bucket correspondiente se carga desde el archivo.
+4. **Manejo de Bucket Lleno**:
+    - **Bucket Lleno pero Profundidad < Profundidad Máxima**: Si el bucket está lleno y su profundidad local es menor que la profundidad máxima, el bucket se divide. La función incrementa la profundidad local del bucket y reasigna los registros en dos nuevos buckets según sus valores hash. Se crea un nuevo registro de índice para el nuevo bucket.
+    - **Bucket Lleno y Profundidad >= Profundidad Máxima**: Si la profundidad local del bucket ya está en el máximo, maneja el desbordamiento creando páginas de desbordamiento si es necesario e inserta el registro en la página de desbordamiento adecuada.
+5. **Bucket No Lleno**: Si el bucket no está lleno, simplemente se añade el registro a él.
+6. **Guardar Cambios**: El bucket (y cualquier nuevo bucket o páginas de desbordamiento) se guarda de nuevo en el archivo, y la función completa la inserción.
+
+#### Remove
+La función `remove` elimina un registro con una clave específica de la tabla hash. El proceso incluye:
+
+1. **Generación del Hash**: Se genera un hash para la clave dada.
+2. **Coincidencia de Índice**: Se encuentra el registro de índice que coincide.
+3. **Recorrido del Bucket**: Se carga el bucket correspondiente y se busca el registro a eliminar.
+4. **Páginas de Desbordamiento**: Se recorren las páginas de desbordamiento y se eliminan todas las apariciones del registro.
+5. **Guardar Cambios**: Los buckets modificados se guardan de nuevo en el archivo.
+
+#### Search
+La función `search` recupera los registros que coinciden con una clave dada. El proceso incluye:
+
+1. **Generación del Hash**: Se genera un hash para la clave dada.
+2. **Coincidencia de Índice**: Se encuentra el registro de índice que coincide.
+3. **Recorrido del Bucket**: Se carga el bucket correspondiente y se busca el registro.
+4. **Páginas de Desbordamiento**: Se recorren las páginas de desbordamiento para encontrar todos los registros coincidentes.
+5. **Devolver Resultados**: Se devuelve un vector de todos los registros que coinciden con la clave.
