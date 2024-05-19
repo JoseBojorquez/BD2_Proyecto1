@@ -1,5 +1,6 @@
 #include "Bucket.h"
 
+
 struct IndexRecord {
     depth_t depth;
     suffix_t sufix;

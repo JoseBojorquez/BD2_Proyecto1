@@ -1,6 +1,5 @@
 #include "IndexRecord.h"
 
-//template <typename TKey,typename TRecord>
 template <typename KeyType,typename RecordType>
 class ExtendibleHash {
 private:

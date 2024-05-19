@@ -1,6 +1,7 @@
 // #include "../src/RecordTest.h"
 #include "../src/CreditCardRecord.h"
 
+
 template <typename RecordType>
 struct Bucket {
     bucketSize_t bsize;
