@@ -1,13 +1,12 @@
 # BD2_Proyecto1
 ## Integrantes:
-- José Bojorquez
 - Sebastian Tenorio
 - Carlos Flores
 - José Osnayo
 ## Introducción
 Para el presente proyecto se implementaron estrategias de organización de archivos para el manejo de un sistema de gestión de base de datos. Bajo esta premisa, implementamos un parser SQL y elegimos tres métodos de organización de archivos: Sequential File, ISAM y Extendible Hashing. 
 ## Dominio de datos
-Dentro del proyecto, trabajaremos con los siguientes 2 datasets definidos para la carga de archivos .csv:\
+Dentro del proyecto, trabajaremos con los siguientes 2 datasets definidos para la carga de archivos .csv:
 ### Credit Card Fraud Detection Dataset 2023
 #### Descripción de las variables 
 
@@ -79,7 +78,7 @@ Las estrategias usadas son las siguientes:
 \
 ### Extendible Hashing
 ![extendibleHashing](/Imagenes/extendibleHashing.png) \
-**Insert:** Sea D la profundidad global del índice, aplica la función hash sobre la clave de búsqueda y obtener la secuencia de bits con longitud D. Después hace coincidir esa secuencia con una entrada en el directorio y se dirige al bucket correspondiente para encontrar el registro. \
+**Insert:** Sea D la profundidad global del índice, aplica la función hash sobre la clave de búsqueda y obtener la secuencia de bits con longitud D. Después hace coincidir esa secuencia con una entrada en el directorio y se dirige al bucket correspondiente para encontrar el registro. 
 \
 **Find:** Se usa de manera parecida la secuencia D-bit para dirigirse al bucket en cuestión. Si no encuentra el bucket, procede a crear uno nuevo. Si encontró un bucket y no esta lleno, proceder a insertar. Si el bucket está lleno, divide el bucket y reinserta todos los registros actualizando el directorio. \
 \
