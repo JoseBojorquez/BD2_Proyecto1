@@ -1,27 +1,117 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstring>
 #include <vector>
 using namespace std;
 
 struct Record{
     int id;
-    char dato[10];
-    int nextpos;
-    bool deleted;
+    double V1;
+    double V2;
+    double V3;
+    double V4;
+    double V5;
+    double V6;
+    double V7;
+    double V8;
+    double V9;
+    double V10;
+    double V11;
+    double V12;
+    double V13;
+    double V14;
+    double V15;
+    double V16;
+    double V17;
+    double V18;
+    double V19;
+    double V20;
+    double V21;
+    double V22;
+    double V23;
+    double V24;
+    double V25;
+    double V26;
+    double V27;
+    double V28;
+    float Amount;
+    bool Class;
+    int nextpos{-1};
+    bool deleted{false};
 
-    void setData(int id, char* dato1){
-        this->id = id;
-        strcpy(dato,dato1);
-        this->nextpos = -1;
-        this->deleted = false;
-    }
-    void showData(){
-        cout << id << endl;
-        cout << dato << endl;
-        cout << nextpos << endl;
-        cout << deleted << endl;
-    }
+    void setData(int id, double V1, double V2, double V3, double V4, double V5, double V6, double V7, double V8, double V9, double V10, double V11, double V12, double V13, double V14, double V15, double V16, double V17, double V18, double V19, double V20, double V21, double V22, double V23, double V24, double V25, double V26, double V27, double V28, float Amount, bool Class) {
+    this->id = id;
+    this->V1 = V1;
+    this->V2 = V2;
+    this->V3 = V3;
+    this->V4 = V4;
+    this->V5 = V5;
+    this->V6 = V6;
+    this->V7 = V7;
+    this->V8 = V8;
+    this->V9 = V9;
+    this->V10 = V10;
+    this->V11 = V11;
+    this->V12 = V12;
+    this->V13 = V13;
+    this->V14 = V14;
+    this->V15 = V15;
+    this->V16 = V16;
+    this->V17 = V17;
+    this->V18 = V18;
+    this->V19 = V19;
+    this->V20 = V20;
+    this->V21 = V21;
+    this->V22 = V22;
+    this->V23 = V23;
+    this->V24 = V24;
+    this->V25 = V25;
+    this->V26 = V26;
+    this->V27 = V27;
+    this->V28 = V28;
+    this->Amount = Amount;
+    this->Class = Class;
+    this->nextpos = -1;
+    this->deleted = false;
+}
+
+void showData() {
+    cout << "ID: " << id << endl;
+    cout << "V1: " << V1 << endl;
+    cout << "V2: " << V2 << endl;
+    cout << "V3: " << V3 << endl;
+    cout << "V4: " << V4 << endl;
+    cout << "V5: " << V5 << endl;
+    cout << "V6: " << V6 << endl;
+    cout << "V7: " << V7 << endl;
+    cout << "V8: " << V8 << endl;
+    cout << "V9: " << V9 << endl;
+    cout << "V10: " << V10 << endl;
+    cout << "V11: " << V11 << endl;
+    cout << "V12: " << V12 << endl;
+    cout << "V13: " << V13 << endl;
+    cout << "V14: " << V14 << endl;
+    cout << "V15: " << V15 << endl;
+    cout << "V16: " << V16 << endl;
+    cout << "V17: " << V17 << endl;
+    cout << "V18: " << V18 << endl;
+    cout << "V19: " << V19 << endl;
+    cout << "V20: " << V20 << endl;
+    cout << "V21: " << V21 << endl;
+    cout << "V22: " << V22 << endl;
+    cout << "V23: " << V23 << endl;
+    cout << "V24: " << V24 << endl;
+    cout << "V25: " << V25 << endl;
+    cout << "V26: " << V26 << endl;
+    cout << "V27: " << V27 << endl;
+    cout << "V28: " << V28 << endl;
+    cout << "Amount: " << Amount << endl;
+    cout << "Class: " << Class << endl;
+    cout << "Nextpos: " << nextpos << endl;
+    cout << "Deleted: " << deleted << endl;
+}
+
 };
 
 struct Bloque{
@@ -32,7 +122,7 @@ struct Bloque{
 struct SeqFile{
     string filename;
     string auxname;
-    int K = 10;  //Limite maximo de registros en el archivo auxiliar
+    int K = 30;  //Limite maximo de registros en el archivo auxiliar
     const int MAX_PRIMARY_RECORDS = 100; //Límite de registros en el archivo principal
     SeqFile(string filename){
         this->filename = filename;
@@ -79,7 +169,6 @@ struct SeqFile{
       file.close();
       //Si no se encuentra el registro, devolver un registro con id -1 para indicar que no se encontró
       Record notFound;
-      notFound.setData(-1, (char*)"");
       notFound.deleted = true;
       return notFound;
     }
@@ -306,5 +395,81 @@ void remove(int key) {
     
       return results;
   }
+
+void loadFromCSV(const string& filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "No se pudo abrir el archivo CSV." << endl;
+        return;
+    }
+    // Leer y descartar el encabezado
+    string header;
+    if (getline(file, header)) {
+    // Encabezado leído y descartado
+    } else {
+        cout << "Error: El archivo CSV está vacío." << endl;
+        return;
+    }
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string token;
+
+        // Leer los campos de la línea separados por comas
+        vector<string> fields;
+        while (getline(ss, token, ',')) {
+            fields.push_back(token);
+        }
+
+        // Crear un nuevo registro y establecer sus datos desde los campos
+        if (fields.size() == 31) {  //Asumiendo que hay 31 campos en cada línea
+            Record newRecord;
+            int id = stoi(fields[0]);  //Convertir el primer campo a entero
+
+            // Convertir los campos de cadena a double o float
+            double V1 = stod(fields[1]);
+            double V2 = stod(fields[2]);
+            double V3 = stod(fields[3]);
+            double V4 = stod(fields[4]);
+            double V5 = stod(fields[5]);
+            double V6 = stod(fields[6]);
+            double V7 = stod(fields[7]);
+            double V8 = stod(fields[8]);
+            double V9 = stod(fields[9]);
+            double V10 = stod(fields[10]);
+            double V11 = stod(fields[11]);
+            double V12 = stod(fields[12]);
+            double V13 = stod(fields[13]);
+            double V14 = stod(fields[14]);
+            double V15 = stod(fields[15]);
+            double V16 = stod(fields[16]);
+            double V17 = stod(fields[17]);
+            double V18 = stod(fields[18]);
+            double V19 = stod(fields[19]);
+            double V20 = stod(fields[20]);
+            double V21 = stod(fields[21]);
+            double V22 = stod(fields[22]);
+            double V23 = stod(fields[23]);
+            double V24 = stod(fields[24]);
+            double V25 = stod(fields[25]);
+            double V26 = stod(fields[26]);
+            double V27 = stod(fields[27]);
+            double V28 = stod(fields[28]);
+
+            float Amount = stof(fields[29]);  
+            bool Class = stoi(fields[30]);    
+
+            // Establecer los datos en el nuevo registro
+            newRecord.setData(id, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, V21, V22, V23, V24, V25, V26, V27, V28, Amount, Class);
+
+            // Insertar el nuevo registro en el archivo principal
+            insert(newRecord);
+        } else {
+            cout << "Error: La línea no tiene el formato esperado." << endl;
+        }
+    }
+
+    file.close();
+}
 
 };
