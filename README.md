@@ -139,3 +139,8 @@ chmod +x HomeRecord_100.sh
 ./HomeRecord_100.sh
 ```
 #### 4.2 Todo se guarda en */results/Homes*
+
+
+## Video
+Enlace al video demostración: \
+https://drive.google.com/drive/folders/1G9QdsCGRUKsI3evvueNI_X0DSzDi3jCd?usp=sharing
